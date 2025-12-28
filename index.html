@@ -1,1 +1,89 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CuanGaming • Forum</title>
+<style>
+body { font-family:"Poppins",sans-serif; background:#f5f6fa; color:#1a1a3f; margin:0;}
+header {background:#fff; padding:10px 20px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 2px 5px rgba(0,0,0,0.1);}
+header img { height:48px; cursor:pointer; }
+header .nav a { margin-left:10px; text-decoration:none; color:#1a1a3f; font-weight:600; }
+.container { max-width:900px; margin:20px auto; padding:0 10px; }
+.thread { background:#fff; padding:15px; border-radius:8px; margin-bottom:20px; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
+.thread h3 { margin-bottom:5px; }
+.thread .meta { font-size:0.85em; color:#777; margin-bottom:10px; }
+.comments { margin-top:10px; border-top:1px solid #eee; padding-top:10px; }
+.comment { background:#f1f2f6; padding:8px; border-radius:5px; margin-bottom:5px; }
+.comment strong { display:block; margin-bottom:3px; }
+form { display:flex; flex-direction:column; margin-top:10px; }
+form input, form textarea { padding:8px; margin-bottom:8px; border-radius:4px; border:1px solid #ccc; }
+form button { padding:10px; border:none; border-radius:4px; background:#1a1a3f; color:#fff; cursor:pointer; transition:0.3s; }
+form button:hover { background:#333366; }
+</style>
+</head>
+<body>
 
+<header>
+  <div class="logo"><a href="index.html"><img src="https://raw.githubusercontent.com/cuangaming/funbot/main/Cuan%20Logo%20(1)%20copy%20fit.png" alt="Logo"></a></div>
+  <div class="nav">
+    <a href="testimoni.html">Testimoni</a>
+    <a href="hubungi.html">Hubungi</a>
+  </div>
+</header>
+
+<div class="container" id="forumContainer">
+  <!-- Threads akan dimuat di sini -->
+</div>
+
+<script>
+const container = document.getElementById('forumContainer');
+
+async function fetchThreads(){
+  const res = await fetch('/api/threads');
+  const threads = await res.json();
+  renderThreads(threads);
+}
+
+function renderThreads(threads){
+  container.innerHTML = '';
+  threads.forEach(thread=>{
+    const div = document.createElement('div');
+    div.className='thread';
+    div.innerHTML=`
+      <h3>${thread.title}</h3>
+      <div class="meta">oleh ${thread.author} • ${new Date(thread.date).toLocaleString()}</div>
+      <div class="comments" id="comments-${thread.id}">
+        ${thread.comments.map(c=>`<div class="comment"><strong>${c.name}</strong>${c.text}</div>`).join('')}
+      </div>
+      <form onsubmit="addComment(event, ${thread.id})">
+        <input type="text" placeholder="Nama" required name="name">
+        <textarea placeholder="Tulis komentar" required name="text"></textarea>
+        <button type="submit">Kirim</button>
+      </form>
+    `;
+    container.appendChild(div);
+  });
+}
+
+async function addComment(e, threadId){
+  e.preventDefault();
+  const form = e.target;
+  const name = form.name.value;
+  const text = form.text.value;
+
+  await fetch(`/api/threads/${threadId}/comments`,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({name,text})
+  });
+  form.reset();
+  fetchThreads();
+}
+
+// Load awal
+fetchThreads();
+</script>
+
+</body>
+</html>
