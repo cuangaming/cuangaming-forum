@@ -53,10 +53,10 @@ function renderThreads(threads){
     div.innerHTML=`
       <h3>${thread.title}</h3>
       <div class="meta">oleh ${thread.author} • ${new Date(thread.date).toLocaleString()}</div>
-      <div class="comments" id="comments-${thread.id}">
+      <div class="comments" id="comments-${thread._id}">
         ${thread.comments.map(c=>`<div class="comment"><strong>${c.name}</strong>${c.text}</div>`).join('')}
       </div>
-      <form onsubmit="addComment(event, ${thread.id})">
+      <form onsubmit="addComment(event, '${thread._id}')">
         <input type="text" placeholder="Nama" required name="name">
         <textarea placeholder="Tulis komentar" required name="text"></textarea>
         <button type="submit">Kirim</button>
